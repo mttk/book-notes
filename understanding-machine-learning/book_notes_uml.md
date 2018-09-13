@@ -34,17 +34,59 @@ Note: this definition holds for any $S$ -- $S$ can be any random sample from the
 
 **IID assumption** All samples are _independently_ and _identically_ distributed according to $\mathcal{D}$: $S\sim \mathcal{D}^m$.
 
-**Accuracy**: the accuracy parameter $\epsilon$ determines what we consider as failure of the classifier. If $L_{(\mathcal{D}, f)} (h_s) > \epsilon$ we consider this a failure of the learner, while $L_{(\mathcal{D}, f)} (h_s) \le \epsilon$ we consider the algorithm an _approximately correct_ predictor.
+Two new parameters are introduced, the _confidence_ of the distribution sample and _accuracy_ of the classifier.
 
-**Upper bounding the number of failures**: The number of _bad_ hypotheses (which obtain error larger than $\epsilon$) which minimize the training loss on some existing sample(s) $S_{x}$.
+- **Confidence**: parameter $\delta$ denotes the probability of getting a **nonrepresentative** sample of the true distribution. Thus, we call $(1 - \delta)$ the _confidence parameter_
 
-**Union bound**: for two sets $A$, $B$ and a distribution $\mathcal{D}$:
+- **Accuracy**: the accuracy parameter $\epsilon$ determines what we consider as failure of the classifier. If $L_{(\mathcal{D}, f)} (h_s) > \epsilon$ we consider this a failure of the learner, while $L_{(\mathcal{D}, f)} (h_s) \le \epsilon$ we consider the algorithm an _approximately correct_ predictor.
+
+With these parameters, we can formally express the _probability_ to sample an $m-$tuple of instances that will lead to failure of teh learner. We define the _bad_ hypotheses as the subset of the hypothesis space which has error greater than $\epsilon$ on the _true_ distribution.
+
+$$
+\mathcal{H}_ b = \{ h \in \mathcal{H}: L_{(D,f)} (h) > \epsilon \}
+$$
+
+Also, we define the _miseleading_ samples as the data samples which allow a hypothesis from the set of _bad_ hypotheses to minimize the training error (obtain error of 0).
+
+\begin{equation}
+M = \{S_x : \exists h \in \mathcal{H}_ B s.t. L_S(h) = 0 \}
+\label{eq:badsamples}
+\end{equation}
+
+We want to upper bound the number of training samples which produce _bad_ hypotheses (which obtain error lager then $\epsilon$) as the minimizers of the _training_ error.
+
+$$
+\mathcal{D}^m (\{ S_x : L_{(\mathcal{D}, f)} (h_S) > \epsilon\})
+$$
+
+We can rewrite (\ref{eq:badsamples}) as
+
+$$
+M = \bigcup_{h\in \mathcal{H}_ B} \{S_x : L_s(h) = 0\}
+$$
+
+the number of failures is bounded by the number of misleading samples
+
+\begin{equation}
+\mathcal{D}^m (\{ S_x : L_{(\mathcal{D}, f)} (h_S) > \epsilon\}) \leq \mathcal{D}^m (M) = \mathcal{D}^m (\cup_{h\in \mathcal{H}_ B} \{S_x : L_s(h) = 0\})
+\label{eq:failures}
+\end{equation}
+
+---------
+
+**Union bound**: for two sets $A$, $B$ and a distribution $\mathcal{D}$, the union bound states that the size of the union of two sets is at most the sum of the sizes of both set (holds with equality when both sets are disjoint): 
 
 $$
 \mathcal{D} (A \cup B) \le \mathcal{D} (A) + \mathcal{D}(B)
 $$
 
-TODO: annotate upper bound on sample size / accuracy
+---------
+
+By union bounding the RHS of (\ref{eq:failures}), we obtain
+
+$$
+\mathcal{D}^m (\{ S_x : L_{(\mathcal{D}, f)} (h_S) > \epsilon\}) \leq \sum_{h\in \mathcal{H}_ B} \mathcal{D}^m (\{S_x : L_s(h) = 0\})
+$$
 
 **COROLLARY 2.3** $\mathcal{H}$ is a finite hypothesis class. Let $\delta \in (0, 1)$, $\epsilon > 0$ and $m$ is an integer satisfying
 
@@ -101,3 +143,4 @@ Agnostic PAC defines the _relative_ distance from the best classifier in the cho
 **Generalized loss functions**
 
 Given any set $\mathcal{H}$ and a domain set $\mathcal{Z}$, $l$ is any function mapping from $HxZ$ to nonnegative real numbers.
+
