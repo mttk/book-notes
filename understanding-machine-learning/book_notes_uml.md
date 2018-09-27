@@ -1,4 +1,7 @@
-**Chapters 2-4**
+Currently covered
+
+- [x] Chapter 2 
+- [ ] Chapter 3
 
 ### Chapter 2: A gentle start
 
