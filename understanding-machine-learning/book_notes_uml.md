@@ -1,7 +1,11 @@
 Currently covered
 
-- [x] Chapter 2 
-- [ ] Chapter 3
+- [x] Chapter 2
+  - [ ] Exercises 
+- [x] Chapter 3
+  - [ ] Exercises
+- [ ] Chapter 4
+
 
 ### Chapter 2: A gentle start
 
