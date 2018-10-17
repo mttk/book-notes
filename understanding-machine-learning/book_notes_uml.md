@@ -1,11 +1,7 @@
 Currently covered
 
-- [x] Chapter 2
-  - [ ] Exercises 
-- [x] Chapter 3
-  - [ ] Exercises
-- [ ] Chapter 4
-
+- Chapter 2
+- Chapter 3
 
 ### Chapter 2: A gentle start
 
@@ -203,3 +199,95 @@ $$
 **Agnostic PAC learnability for general loss functions**
 
 **DEFINITION 3.4** (Agnostic PAC for GLF) Everything remains the same as in **3.3** except the loss definition is redefined as: $L_{\mathcal{D}}(h) = \underset{z\sim \mathcal{D}}{\mathbb{E}}[l(h, z)]$
+
+### Chapter 4: Learning via uniform convergence
+
+Idea: we hope that the minimizer of empirical risk is close to the minimizer of the true risk.
+
+Rephrased: we need that uniformly (equally probable for all, none are favored) over all hypotheses in the hypothesis class, the empirical risk will be close to the true risk:
+
+**DEFINITION 4.1.** ($\epsilon$-representative sample) A training set $S$ is called $\epsilon$-representative (w.r.t. domain $\mathbb{Z}$, hypothesis class $\mathcal{H}$ loss function $l$ and distribution $\mathcal{D}$) if:
+
+\begin{equation}
+\forall h \in \mathcal{H}, \quad |L_S(h) - L_\mathcal{D}(h)| \le \epsilon
+\label{eq:erepr}
+\end{equation}
+
+Whenever a training sample (set) is ($\epsilon/2$-representative), the ERM learning rule is guaranteed to return a _good_ hypothesis. 
+
+**LEMMA 4.2.** Assume that a training set $S$ is $\frac{\epsilon}{2}$-representative. Then, any ERM on $S$ satisfies:
+
+$$
+L_{\mathcal{D}} (h_S) \le \min_{h\in \mathcal{H}} L_D(h) + \epsilon
+$$
+
+**Note**: The formula (\ref{eq:erepr}) contains the absolute value of the difference, meaning that in the text of the proof (omitted here) in steps 1. and 3., the _worst case_ of the inequality is used (as we are computing the _upper bound_).
+
+The requirement for the ERM rule to be an agnostic PAC learner is that with probability of at least $1 - \delta$ we wil sample an $\epsilon$-representative training set.
+
+**DEFINITION 4.3.** (Uniform Convergence) Formalizes the requirement that for a sample size larger than the (UC) sample complexity, we _will_ i.i.d. sample an $\epsilon$-representative sample with probability at least $1-\delta$.
+
+#### Finite hypothesis classes are agnostic PAC learnable
+
+In order to establish that finite hypothesis classes are agnostic PAC learnable, we only need to show that uniform convergence holds in their case.
+
+
+We start with the inequality similar to section 2, with the realizability assumption replaced by the _generalization gap_.
+
+$$
+\mathcal{D}^m (\{ S : \exists h \in \mathcal{H}, \underbrace{|L_S(h) - L_{\mathcal{D}}(h)|}_ {\text{generalization gap}} > \epsilon \}) < \delta
+$$
+
+the RHS argument can be rewritten as a union and then a summation through the union bound akin to the steps in section 2. We thus obtain a familiar equation:
+
+$$
+\mathcal{D}^m (\{ S : \exists h \in \mathcal{H}, |L_S(h) - L_{\mathcal{D}}(h)| > \epsilon \}) \le \sum_{h \in \mathcal{H}} \mathcal{D}^m (\{ S : |L_S(h) - L_{\mathcal{D}}(h)| > \epsilon\})
+$$
+
+The next step is to show that the generalization gap for each fixed hypothesis $h \in \mathcal{H}$ in the RHS is _small enough_, or _likely to be small_. The issue we are dealing with is the difference between the expectation and empirical mean. ($L_{\mathcal{D}}(h) = \mathbb{E}_ {z\sim \mathcal{D}} [l(h, z)]$ and $L_S(h) = \frac{1}{m} \sum_{i=1}^m l(h, z_i)$)
+
+The expected value of $l(h, z_i)$ is actually $L_{\mathcal{D}}(h)$. So, in bounding the difference between the expectation and empirical mean, we are interested in how much do the empirical losses _deviate_ from the expectation, or in other words, we need to show that the measure $L_S(h)$ is _concentrated_ arond the expected value. The law of large numbers says that when $m$ goes to infinity, this gap becomes zero, but does not provide any ensurance on gap width.
+
+
+**LEMMA 4.5** (Hoeffding's Inequality) Let $\sigma_1, \ldots, \sigma_m$ be a sequence of i.i.d. r.v.'s and assume that for all $i$, $\mathbb{E} [\sigma_i] = \mu$ and $\mathbb{P}[a \le \sigma_i \le b] = 1$. THen, for any $\epsilon > 0$
+
+\begin{equation}
+\mathbb{P} \Bigg[ \Bigg| \frac{1}{m} \sum_{i=1}^m \sigma_i - \mu \Bigg| > \epsilon \Bigg] \le 2 \exp(-2\epsilon ^2 / (b - a)^2)
+\label{eq:hoeff}
+\end{equation}
+
+In our case, $\sigma_i$ is the r.v. $l(h, z_i)$, and $L_{\mathcal{D}}(h) = \mu$. **We assume** the range of $l$ is $[0,1]$, meaning $\sigma_i \in [0,1]$. Plugging this into (\ref{eq:hoeff}), we obtain:
+
+\begin{equation*}
+\begin{aligned}
+\mathcal{D}^m (\{ S : \exists h \in \mathcal{H}, |L_S(h) - L_{\mathcal{D}}(h)| > \epsilon \}) &\le  \sum_{h \in \mathcal{H}} 2 \exp ( - 2 m \epsilon^2) \\
+                                                                                              &= 2 \, |\mathcal{H}| \exp ( - 2 m \epsilon^2)
+\end{aligned}
+\end{equation*}
+
+If we choose $m$ such that
+
+$$
+m \ge \frac{\log (2 \, |\mathcal{H}| / \delta)}{2 \epsilon ^2}
+$$
+
+then
+
+$$
+\mathcal{D}^m (\{ S : \exists h \in \mathcal{H}, |L_S(h) - L_{\mathcal{D}}(h)| > \epsilon \}) \le \delta.
+$$
+
+**COROLLARY 4.6** Let $\mathcal{H}$ be a finite hypothesis class, $Z$ be a domain and $l : \mathcal{H} \times Z \to [0,1]$ be a loss function. Then, $\mathcal{H}$ enjoys the uniform convergence property with sample complexity
+
+$$
+m_{\mathcal{H}}^{UC} (\epsilon, \delta) \le \Bigg\lceil \frac{\log (2 |\mathcal{H}| / \delta)}{2\epsilon ^2} \Bigg\rceil.
+$$
+
+Furthermore, the class is agnosticaly PAC learnable using the ERM algorithm with sample complexity
+
+$$
+m_{\mathcal{H}}(\epsilon, \delta) \le m_{\mathcal{H}}^{UC} (\epsilon/2, \delta) \le \Bigg\lceil \frac{2 \log (2 |\mathcal{H}| / \delta)}{\epsilon ^2} \Bigg\rceil.
+$$
+
+_REMARK 4.1_ (The "Discretization Trick"): Most hypothesis classes are infinite (essentially, any hypothesis that uses a real-valued weight), however if we approximate them with machine precision, they become finite due to the limitation of representing floating point numbers.
+
